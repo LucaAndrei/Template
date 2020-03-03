@@ -37,6 +37,8 @@ var gulp = require('gulp'),
     log = require("fancy-log"),
     beep = require("beeper");
 
+    var inject = require("gulp-inject")
+
 
 var config = {
     main: {
@@ -49,7 +51,8 @@ var config = {
     },
     scss: {
         src: 'src/scss/**/*.scss',
-        outputDir: './dist/css'
+        outputDir: './dist/css',
+        outputFile: './dist/css/styles.css'
     }
 };
 
@@ -106,6 +109,13 @@ gulp.task('bundle', function () {
     return bundleCSS();
 })
 
+gulp.task('injectCSS', function () {
+    log('Injecting CSS...');
+    return gulp.src(['./**/*.html', '!./node_modules/**/*.html', '!./dist/**/*.html'])
+        .pipe(inject(gulp.src(config.scss.outputFile, {read: false})))
+        .pipe(gulp.dest('./'))
+})
+
 gulp.task('watch', function () {
     browserSync.init({
         server: {
@@ -118,4 +128,4 @@ gulp.task('watch', function () {
     watch('./*.html').on('change', browserSync.reload);
 });
 
-exports.w = gulp.series('bundle', 'watch')
+exports.w = gulp.series('bundle', 'injectCSS', 'watch')
